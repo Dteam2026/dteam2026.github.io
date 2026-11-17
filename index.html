@@ -1,13 +1,849 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-     <meta charset="UTF-8">
-     <title>나의 VWO 실험 페이지</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>오후커피 (OHOO COFFEE) - 공식 메뉴 & 스마트 오더</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ohooYellow: '#FFD400',
+            ohooYellowHover: '#F5C800',
+            ohooBlack: '#1A1A1A',
+            ohooDark: '#262626',
+            ohooGray: '#F6F6F6',
+            ohooBorder: '#E5E5E5',
+          },
+          fontFamily: {
+            sans: ['"Noto Sans KR"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #FFFFFF;
+      color: #1A1A1A;
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-up { animation: fadeUp 0.25s ease-out forwards; }
+  </style>
+</head>
+<body class="antialiased selection:bg-ohooYellow selection:text-ohooBlack">
 
-     </head>
-<body>
-<h1>안녕하세요! VWO 실험 중입니다.</h1>
-<p>이 버튼의색상을바꾸는A/B 테스트를진행할예정입니다.</p>
-<button id="test-button">구매하기</button>
-</body>
-</html>
+  <!-- 상단 공지 배너 -->
+  <div class="bg-ohooBlack text-ohooYellow text-xs font-bold py-2 px-4 text-center tracking-tight">
+    [공지] 오후커피 공식 앱 주문 시 스탬프 2배 적립! 스페셜티 블렌드 원두 100% 사용 ☕
+  </div>
+
+  <!-- 메인 헤더 -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-ohooBorder shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
+      <!-- 브랜드 로고 -->
+      <a href="#" class="flex items-center gap-2.5 group">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 bg-ohooYellow rounded-xl flex items-center justify-center border-2 border-ohooBlack shadow-[2px_2px_0px_#1A1A1A] group-hover:translate-x-[1px] group-hover:translate-y-[1px] transition-transform">
+          <svg class="w-6 h-6 text-ohooBlack" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 8h1a4 4 0 1 1 0 8h-1"/>
+            <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/>
+            <line x1="6" y1="2" x2="6" y2="4"/>
+            <line x1="10" y1="2" x2="10" y2="4"/>
+            <line x1="14" y1="2" x2="14" y2="4"/>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-baseline gap-1.5">
+            <span class="text-xl sm:text-2xl font-black tracking-tight text-ohooBlack">오후커피</span>
+            <span class="text-[11px] font-black bg-ohooBlack text-ohooYellow px-1.5 py-0.5 rounded uppercase">OHOO</span>
+          </div>
+          <p class="text-[10px] sm:text-xs font-bold text-neutral-500 tracking-wider">OHOO COFFEE ROASTERS</p>
+        </div>
+      </a>
+
+      <!-- 내비게이션 메뉴 -->
+      <nav class="hidden md:flex items-center gap-8 font-bold text-[15px]">
+        <a href="#menu-section" onclick="resetFilters()" class="hover:text-amber-500 transition-colors">메뉴소개</a>
+        <a href="#menu-section" onclick="filterBestOnly()" class="hover:text-amber-500 transition-colors flex items-center gap-1">
+          베스트
+          <span class="bg-ohooYellow text-ohooBlack text-[10px] font-black px-1.5 py-0.5 rounded-full">BEST</span>
+        </a>
+        <a href="#store-info" class="hover:text-amber-500 transition-colors">매장안내</a>
+      </nav>
+
+      <!-- 장바구니 버튼 -->
+      <button onclick="toggleCart(true)" class="relative flex items-center gap-2 bg-ohooBlack hover:bg-neutral-800 text-white px-4 py-2.5 rounded-full font-bold text-sm transition-all active:scale-95 shadow-md">
+        <svg class="w-5 h-5 text-ohooYellow" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+        </svg>
+        <span class="hidden sm:inline">주문내역</span>
+        <span id="cart-badge" class="bg-ohooYellow text-ohooBlack text-xs font-black w-5 h-5 rounded-full flex items-center justify-center">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 히어로 배너 (컴포즈커피 스타일 옐로우 & 블랙 블록) -->
+  <section class="relative bg-ohooYellow overflow-hidden border-b-2 border-ohooBlack">
+    <div class="absolute -right-16 -top-16 w-72 h-72 rounded-full bg-white/25 pointer-events-none"></div>
+    <div class="absolute right-1/4 -bottom-20 w-56 h-56 rounded-full bg-ohooBlack/5 pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      <div class="lg:col-span-7 space-y-5 z-10">
+        <div class="inline-flex items-center gap-2 bg-ohooBlack text-ohooYellow px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-black tracking-wide">
+          <span>★ SPECIALTY COFFEE</span>
+          <span class="text-white/40">|</span>
+          <span>대용량 스페셜티 원두</span>
+        </div>
+        <h1 class="text-3xl sm:text-5xl lg:text-[54px] font-black text-ohooBlack leading-[1.18] tracking-tight">
+          매일 오후,<br />
+          당신의 특별한 휴식
+        </h1>
+        <p class="text-ohooBlack/85 text-sm sm:text-lg font-medium max-w-xl leading-relaxed">
+          엄선된 스페셜티 블렌드 원두로 내린 깊고 진한 아메리카노부터 달콤한 시그니처 라떼까지, 합리적인 가격과 넉넉한 용량으로 만나보세요.
+        </p>
+        <div class="pt-2 flex flex-wrap items-center gap-3">
+          <a href="#menu-section" onclick="resetFilters()" class="bg-ohooBlack hover:bg-neutral-800 text-ohooYellow font-black px-7 py-3.5 rounded-xl text-sm sm:text-base transition-all shadow-[4px_4px_0px_rgba(0,0,0,0.2)] active:translate-y-0.5">
+            전체 메뉴 보기
+          </a>
+          <a href="#menu-section" onclick="filterBestOnly()" class="bg-white hover:bg-neutral-100 text-ohooBlack border-2 border-ohooBlack font-black px-6 py-3.5 rounded-xl text-sm sm:text-base transition-all">
+            인기 베스트 메뉴
+          </a>
+        </div>
+      </div>
+
+      <!-- 우측 비주얼 카드 -->
+      <div class="lg:col-span-5 flex justify-center z-10">
+        <div class="relative w-full max-w-sm bg-white border-2 border-ohooBlack rounded-3xl p-5 shadow-[8px_8px_0px_#1A1A1A]">
+          <div class="flex items-center justify-between mb-3">
+            <span class="bg-ohooYellow text-ohooBlack text-xs font-black px-2.5 py-1 rounded-md border border-ohooBlack">SIGNATURE</span>
+            <span class="text-xs font-bold text-neutral-500">HOT / ICE 20oz</span>
+          </div>
+          <div class="aspect-[4/3] rounded-2xl overflow-hidden bg-neutral-100 mb-4 border border-neutral-200">
+            <img src="https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=800&q=80" alt="오후 시그니처 아메리카노" class="w-full h-full object-cover" />
+          </div>
+          <div class="flex items-end justify-between">
+            <div>
+              <p class="text-xs font-bold text-neutral-500">오후커피 대표 메뉴</p>
+              <h3 class="text-xl font-black text-ohooBlack">오후 아메리카노</h3>
+            </div>
+            <div class="text-right">
+              <span class="text-2xl font-black text-ohooBlack">1,500</span>
+              <span class="text-sm font-bold text-ohooBlack">원</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 매장/포장 선택 바 (키오스크 스타일) -->
+  <div class="bg-ohooGray border-b border-ohooBorder">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-neutral-700">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>주문 매장: <strong class="text-ohooBlack">오후커피 강남본점</strong> (바로 주문 가능)</span>
+      </div>
+      <div class="flex items-center bg-white p-1 rounded-xl border border-ohooBorder shadow-xs">
+        <button id="order-type-takeout" onclick="setOrderType('테이크아웃 (포장)')" class="px-3.5 py-1.5 rounded-lg text-xs font-black bg-ohooBlack text-ohooYellow transition-all">
+          테이크아웃 (포장)
+        </button>
+        <button id="order-type-dinein" onclick="setOrderType('매장 식사')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold text-neutral-600 hover:text-ohooBlack transition-all">
+          매장 식사
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 메인 메뉴 섹션 -->
+  <main id="menu-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+    <!-- 섹션 타이틀 및 검색 -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+      <div>
+        <span class="text-xs font-black tracking-widest text-amber-500 uppercase">OHOO MENU</span>
+        <h2 class="text-2xl sm:text-3xl font-black text-ohooBlack mt-1">오후커피 메뉴 안내</h2>
+      </div>
+
+      <!-- 검색창 -->
+      <div class="relative w-full md:w-80">
+        <input
+          type="text"
+          id="search-input"
+          oninput="handleSearch(this.value)"
+          placeholder="메뉴명을 검색해 주세요 (예: 아메리카노, 라떼)"
+          class="w-full pl-10 pr-4 py-2.5 bg-ohooGray border border-ohooBorder focus:border-ohooBlack focus:bg-white rounded-xl text-sm font-medium outline-none transition-all"
+        />
+        <svg class="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 카테고리 탭 -->
+    <div id="category-tabs" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-3 mb-8 border-b border-ohooBorder">
+      <!-- JS로 동적 렌더링 -->
+    </div>
+
+    <!-- 메뉴 그리드 -->
+    <div id="menu-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+      <!-- JS로 동적 렌더링 -->
+    </div>
+
+    <!-- 검색 결과 없음 상태 -->
+    <div id="empty-state" class="hidden py-20 text-center">
+      <div class="w-16 h-16 bg-ohooGray rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">☕</div>
+      <h3 class="text-lg font-black text-ohooBlack">검색하신 메뉴를 찾을 수 없습니다</h3>
+      <p class="text-sm text-neutral-500 mt-1">다른 검색어를 입력하거나 전체 메뉴를 확인해 주세요.</p>
+      <button onclick="resetFilters()" class="mt-4 bg-ohooYellow border border-ohooBlack text-ohooBlack font-black text-xs px-5 py-2.5 rounded-xl">
+        전체 메뉴 보기
+      </button>
+    </div>
+  </main>
+
+  <!-- 매장 및 원두 안내 배너 -->
+  <section id="store-info" class="bg-ohooBlack text-white py-14 border-t-4 border-ohooYellow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="bg-ohooDark p-6 rounded-2xl border border-neutral-800">
+        <span class="inline-block bg-ohooYellow text-ohooBlack text-xs font-black px-2.5 py-1 rounded mb-3">01. SPECIALTY BLEND</span>
+        <h3 class="text-lg font-black mb-2">고품질 스페셜티 블렌드</h3>
+        <p class="text-sm text-neutral-400 leading-relaxed">
+          브라질, 콜롬비아, 에티오피아 최고급 생두를 자체 로스팅하여 고소한 견과류의 풍미와 깔끔한 산미의 완벽한 밸런스를 구현했습니다.
+        </p>
+      </div>
+      <div class="bg-ohooDark p-6 rounded-2xl border border-neutral-800">
+        <span class="inline-block bg-ohooYellow text-ohooBlack text-xs font-black px-2.5 py-1 rounded mb-3">02. BIG SIZE & VALUE</span>
+        <h3 class="text-lg font-black mb-2">넉넉한 20oz 기본 용량</h3>
+        <p class="text-sm text-neutral-400 leading-relaxed">
+          모든 커피 및 음료 메뉴는 기본 20oz(약 591ml) 대용량으로 제공되며, 오후 메가 사이즈(32oz) 업그레이드 옵션도 선택할 수 있습니다.
+        </p>
+      </div>
+      <div class="bg-ohooDark p-6 rounded-2xl border border-neutral-800">
+        <span class="inline-block bg-ohooYellow text-ohooBlack text-xs font-black px-2.5 py-1 rounded mb-3">03. SMART KIOSK ORDER</span>
+        <h3 class="text-lg font-black mb-2">간편한 맞춤형 커스텀</h3>
+        <p class="text-sm text-neutral-400 leading-relaxed">
+          원하는 메뉴를 클릭해 온도(HOT/ICE), 컵 사이즈, 에스프레소 샷 및 시럽/펄 토핑을 자유롭게 추가하고 대기번호표를 즉시 발급받으세요.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 푸터 -->
+  <footer class="bg-neutral-950 text-neutral-400 text-xs py-10 border-t border-neutral-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+      <div class="space-y-1.5">
+        <div class="flex items-center gap-2 text-white font-black text-base">
+          <span class="text-ohooYellow">●</span> 오후커피 (OHOO COFFEE)
+        </div>
+        <p>주식회사 오후에프앤비 | 대표이사: 김오후 | 사업자등록번호: 123-81-45678</p>
+        <p>서울특별시 강남구 테헤란로 152, 오후빌딩 1층 | 고객센터: 1588-0505 (평일 09:00 ~ 18:00)</p>
+      </div>
+      <div class="text-neutral-500">
+        © 2026 OHOO COFFEE Co., Ltd. All Rights Reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- 음료 옵션 상세 모달 (키오스크 스타일) -->
+  <div id="item-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/65 backdrop-blur-xs p-4">
+    <div class="bg-white w-full max-w-lg rounded-3xl border-2 border-ohooBlack shadow-2xl overflow-hidden animate-fade-up max-h-[92vh] flex flex-col">
+      <!-- 모달 헤더 -->
+      <div class="flex items-center justify-between px-6 py-4 bg-ohooYellow border-b-2 border-ohooBlack">
+        <span class="font-black text-sm text-ohooBlack tracking-tight">메뉴 상세 및 옵션 선택</span>
+        <button onclick="closeItemModal()" class="w-8 h-8 rounded-full bg-ohooBlack text-white flex items-center justify-center hover:bg-neutral-800 transition-colors">
+          ✕
+        </button>
+      </div>
+
+      <!-- 모달 바디 (스크롤 가능) -->
+      <div class="p-6 overflow-y-auto space-y-6">
+        <!-- 상품 기본 정보 -->
+        <div class="flex gap-4 items-center">
+          <img id="modal-img" src="" alt="" class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border border-ohooBorder bg-ohooGray shrink-0" />
+          <div>
+            <div id="modal-badges" class="flex flex-wrap gap-1.5 mb-1.5"></div>
+            <h3 id="modal-name" class="text-xl font-black text-ohooBlack"></h3>
+            <p id="modal-desc" class="text-xs text-neutral-500 mt-1 leading-relaxed"></p>
+            <p class="text-lg font-black text-ohooBlack mt-2"><span id="modal-base-price"></span>원</p>
+          </div>
+        </div>
+
+        <!-- 영양성분 정보 표 -->
+        <div class="bg-ohooGray rounded-2xl p-3.5 border border-ohooBorder">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] font-black text-ohooBlack">영양성분 정보 (1회 제공량 기준)</span>
+            <span class="text-[10px] text-neutral-500">알레르기 유발요인: 우유, 대두</span>
+          </div>
+          <div class="grid grid-cols-5 gap-1 text-center bg-white rounded-xl p-2 border border-ohooBorder text-[11px]">
+            <div>
+              <p class="text-neutral-400 font-medium">열량</p>
+              <p id="nut-kcal" class="font-black text-ohooBlack mt-0.5">-</p>
+            </div>
+            <div class="border-l border-ohooBorder">
+              <p class="text-neutral-400 font-medium">카페인</p>
+              <p id="nut-caffeine" class="font-black text-ohooBlack mt-0.5">-</p>
+            </div>
+            <div class="border-l border-ohooBorder">
+              <p class="text-neutral-400 font-medium">당류</p>
+              <p id="nut-sugar" class="font-black text-ohooBlack mt-0.5">-</p>
+            </div>
+            <div class="border-l border-ohooBorder">
+              <p class="text-neutral-400 font-medium">단백질</p>
+              <p id="nut-protein" class="font-black text-ohooBlack mt-0.5">-</p>
+            </div>
+            <div class="border-l border-ohooBorder">
+              <p class="text-neutral-400 font-medium">포화지방</p>
+              <p id="nut-fat" class="font-black text-ohooBlack mt-0.5">-</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 온도 선택 (HOT / ICE) -->
+        <div id="temp-section">
+          <label class="block text-xs font-black text-ohooBlack mb-2">온도 선택 <span class="text-red-500">*</span></label>
+          <div class="grid grid-cols-2 gap-2.5" id="temp-options">
+            <!-- JS 렌더링 -->
+          </div>
+        </div>
+
+        <!-- 사이즈 선택 -->
+        <div id="size-section">
+          <label class="block text-xs font-black text-ohooBlack mb-2">사이즈 선택 <span class="text-red-500">*</span></label>
+          <div class="grid grid-cols-2 gap-2.5">
+            <button type="button" onclick="selectSize('기본 (20oz)', 0)" id="size-regular" class="size-btn py-3 px-3 rounded-xl border-2 border-ohooBlack bg-ohooYellow/20 text-left transition-all">
+              <div class="text-xs font-black text-ohooBlack">기본 (20oz)</div>
+              <div class="text-[11px] font-bold text-neutral-600 mt-0.5">+0원</div>
+            </button>
+            <button type="button" onclick="selectSize('오후 메가 (32oz)', 1000)" id="size-mega" class="size-btn py-3 px-3 rounded-xl border border-ohooBorder bg-white text-left transition-all">
+              <div class="text-xs font-black text-ohooBlack">오후 메가 (32oz)</div>
+              <div class="text-[11px] font-bold text-neutral-600 mt-0.5">+1,000원</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- 퍼스널 옵션 (토핑/얼음) -->
+        <div id="topping-section">
+          <label class="block text-xs font-black text-ohooBlack mb-2">퍼스널 옵션 (중복 선택 가능)</label>
+          <div class="space-y-2" id="topping-list">
+            <!-- JS 렌더링 -->
+          </div>
+        </div>
+
+        <!-- 수량 조절 -->
+        <div class="flex items-center justify-between pt-2 border-t border-ohooBorder">
+          <span class="text-xs font-black text-ohooBlack">주문 수량</span>
+          <div class="flex items-center gap-3 bg-ohooGray px-3 py-1.5 rounded-xl border border-ohooBorder">
+            <button type="button" onclick="changeModalQty(-1)" class="w-7 h-7 rounded-lg bg-white border border-ohooBorder font-black text-ohooBlack hover:bg-neutral-100">-</button>
+            <span id="modal-qty" class="w-6 text-center font-black text-sm">1</span>
+            <button type="button" onclick="changeModalQty(1)" class="w-7 h-7 rounded-lg bg-white border border-ohooBorder font-black text-ohooBlack hover:bg-neutral-100">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 모달 하단 담기 버튼 -->
+      <div class="p-4 bg-white border-t border-ohooBorder">
+        <button onclick="addToCartFromModal()" class="w-full py-3.5 bg-ohooBlack hover:bg-neutral-800 text-ohooYellow font-black rounded-xl text-sm sm:text-base transition-all flex items-center justify-center gap-2 shadow-lg">
+          <span>장바구니 담기</span>
+          <span>·</span>
+          <span id="modal-total-price">0원</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 장바구니 슬라이드 드로어 -->
+  <div id="cart-drawer" class="fixed inset-0 z-50 hidden">
+    <div onclick="toggleCart(false)" class="absolute inset-0 bg-black/60 backdrop-blur-xs"></div>
+    <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl flex flex-col border-l-2 border-ohooBlack">
+      <!-- 드로어 헤더 -->
+      <div class="px-6 py-4 bg-ohooYellow border-b-2 border-ohooBlack flex items-center justify-between">
+        <div>
+          <h3 class="font-black text-lg text-ohooBlack">주문 장바구니</h3>
+          <p id="cart-order-type-label" class="text-xs font-bold text-ohooBlack/80">테이크아웃 (포장)</p>
+        </div>
+        <button onclick="toggleCart(false)" class="w-8 h-8 rounded-full bg-ohooBlack text-white flex items-center justify-center font-bold">✕</button>
+      </div>
+
+      <!-- 장바구니 리스트 -->
+      <div id="cart-items-container" class="flex-1 overflow-y-auto p-5 space-y-3">
+        <!-- JS 렌더링 -->
+      </div>
+
+      <!-- 장바구니 결제 영역 -->
+      <div class="p-5 bg-ohooGray border-t border-ohooBorder space-y-4">
+        <div class="flex items-center justify-between text-sm">
+          <span class="font-bold text-neutral-600">총 주문 수량</span>
+          <span id="cart-total-count" class="font-black text-ohooBlack">0개</span>
+        </div>
+        <div class="flex items-center justify-between text-lg">
+          <span class="font-black text-ohooBlack">최종 결제 금액</span>
+          <span id="cart-total-price" class="font-black text-2xl text-ohooBlack">0원</span>
+        </div>
+        <button id="checkout-btn" onclick="completeOrder()" disabled class="w-full py-4 bg-ohooBlack disabled:bg-neutral-300 disabled:text-neutral-500 text-ohooYellow font-black rounded-xl text-base transition-all shadow-md">
+          주문하기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 주문 완료 영수증 / 대기번호표 모달 -->
+  <div id="receipt-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-xs p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl border-2 border-ohooBlack p-6 text-center shadow-2xl animate-fade-up">
+      <div class="w-14 h-14 bg-ohooYellow border-2 border-ohooBlack rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl font-black">
+        ✓
+      </div>
+      <span class="text-xs font-black text-amber-500 tracking-wider">ORDER COMPLETED</span>
+      <h3 class="text-xl font-black text-ohooBlack mt-1">주문이 접수되었습니다!</h3>
+      <p class="text-xs text-neutral-500 mt-1">픽업대 모니터에 대기번호가 호출되면 수령해 주세요.</p>
+
+      <div class="my-5 bg-ohooGray border-2 border-dashed border-ohooBlack rounded-2xl py-5 px-4">
+        <p class="text-xs font-bold text-neutral-500">고객 대기번호</p>
+        <p id="receipt-number" class="text-4xl font-black text-ohooBlack tracking-wider my-1">A-104</p>
+        <span id="receipt-type" class="inline-block bg-ohooBlack text-ohooYellow text-[11px] font-black px-2.5 py-0.5 rounded-full mt-1">
+          테이크아웃 (포장)
+        </span>
+      </div>
+
+      <div id="receipt-summary" class="text-left text-xs space-y-1.5 border-t border-b border-ohooBorder py-3 mb-5 text-neutral-700 max-h-36 overflow-y-auto">
+        <!-- 주문 요약 -->
+      </div>
+
+      <button onclick="closeReceiptModal()" class="w-full py-3.5 bg-ohooYellow hover:bg-ohooYellowHover border-2 border-ohooBlack text-ohooBlack font-black rounded-xl text-sm transition-all">
+        확인
+      </button>
+    </div>
+  </div>
+
+  <!-- 토스트 알림 -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden bg-ohooBlack text-ohooYellow px-5 py-3 rounded-full text-xs sm:text-sm font-black shadow-xl border border-ohooYellow/30">
+    장바구니에 메뉴가 담겼습니다.
+  </div>
+
+  <script>
+    // 메뉴 데이터 (100% 한국어 및 한국 카페 인기 메뉴 구성)
+    const MENU_ITEMS = [
+      {
+        id: 1,
+        name: '오후 아메리카노',
+        category: '커피',
+        price: 1500,
+        badge: 'BEST',
+        temps: ['ICE', 'HOT'],
+        isDrink: true,
+        desc: '스페셜티 블렌드 원두의 고소함과 깊은 바디감이 살아있는 오후커피 대표 아메리카노',
+        img: 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=600&q=80',
+        nutrition: { kcal: '15kcal', caffeine: '156mg', sugar: '0g', protein: '1g', fat: '0g' }
+      },
+      {
+        id: 2,
+        name: '카페라떼',
+        category: '커피',
+        price: 2900,
+        badge: 'BEST',
+        temps: ['ICE', 'HOT'],
+        isDrink: true,
+        desc: '진한 에스프레소 투샷과 신선한 1A등급 우유가 조화롭게 어우러진 부드러운 라떼',
+        img: 'https://images.unsplash.com/photo-1570968915860-54d5c301fa9f?auto=format&fit=crop&w=600&q=80',
+        nutrition: { kcal: '185kcal', caffeine: '156mg', sugar: '13g', protein: '9g', fat: '6g' }
+      },
+      {
+        id: 3,
+        name: '바닐라빈 라떼',
+        category: '커피',
+        price: 3400,
+        badge: 'BEST',
+        temps: ['ICE', 'HOT'],
+        isDrink: true,
+        desc: '마다가스카르산 바닐라빈 시럽이 더해져 달콤하고 고급스러운 풍미의 시그니처 라떼',
+        img: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=600&q=80',
+        nutrition: { kcal: '265kcal', caffeine: '156mg', sugar: '28g', protein: '9g', fat: '6g' }
+      },
+      {
+        id: 4,
+        name: '달고나 카페라떼',
+        category: '시즌 메뉴',
+        price: 3900,
+        badge: 'NEW',
+        temps: ['ICE'],
+        isDrink: true,
+        desc: '바삭하고 달콤한 수제 달고나 크런치를 듬뿍 올린 오후커피 인기 시즌 한정 메뉴',
+        img: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&w=600&q=80',
+        nutrition: { kcal: '340kcal', caffeine: '156mg', sugar: '42g', protein: '8g', fat: '7g' }
+      },
+      {
+        id: 5,
+        name: '연유 돌체 라떼',
+        category: '커피',
+        price: 3700,
+        badge: '',
+        temps: ['ICE', 'HOT'],
+        isDrink: true,
+        desc: '진한 에스프레소와 달콤한 연유가 만나 피로를 싹 날려주는 달달한 커피',
+        img: 'https://images.unsplash.com/photo-1585494156145-1c60a4fe952b?auto=format&fit=crop&w=600&q=80',
+        nutrition: { kcal: '295kcal', caffeine: '156mg', sugar: '35g', protein: '10g', fat: '7g' }
+      },
+      {
+        id: 6,
+        name: '흑임자 크림 라떼',
+        category: '시즌 메뉴',
+        price: 4200,
+        badge: 'BEST',
+        temps: ['ICE'],
+        isDrink: true,
+        desc: '고소한 국내산 흑임자 크림이 쫀득하게 올라간 할매니얼 취향 저격 시그니처 라떼',
+        img: 'https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=600&q=80',
+        nutrition: { kcal: '380kcal', caffeine: '140mg', sugar: '31g', protein: '9g', fat: '14g' }
+      },
+      {
+        id: 7,
+        name: '제주 말차 라떼',
+        category: '논커피/라떼',
+        price: 3800,
+        badge: 'BEST',
+        temps: ['ICE', 'HOT'],
+        isDrink: true,
+        desc: '제주산 첫물 어린잎 말차를 사용하여 떫지 않고 진한 녹차의 풍미를 담은 라떼',
+        img: 'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=600&q=80',
+        nutrition: { kcal: '270kcal', caffeine: '65mg', sugar: '29g', protein: '9g', fat: '6g' }
+      },
+      {
+        id: 8,
+        name: '리얼 초코 라떼',
+        category: '논커피/라떼',
+        price: 3500,
+        badge: '',
+        temps: ['ICE', 'HOT'],
+        isDrink: true,
+        desc: '진한 벨기에산 다크 초콜릿 소스로 깊고 진한 달콤함을 선사하는 논커피 메뉴',
+        img: 'https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=600&q=80',
+        nutrition: { kcal: '350kcal', caffeine: '12mg', sugar: '41g', protein: '10g', fat: '9g' }
+      },
+      {
+        id: 9,
+        name: '흑당 버블 라떼',
+        category: '논커피/라떼',
+        price: 4000,
+        badge: 'BEST',
+        temps: ['ICE'],
+        isDrink: true,
+        desc: '쫀득한 타피오카 펄과 진한 흑당 시럽, 고소한 우유가 어우러진 인기 음료',
+        img: 'https://images.unsplash.com/photo-1558857563-b371033873b8?auto=format&fit=crop&w=600&q=80',
+        nutrition: { kcal: '410kcal', caffeine: '0mg', sugar: '48g', protein: '8g', fat: '7g' }
+      },
+      {
+        id: 10,
+        name: '자몽 허니 블랙티',
+        category: '에이드/티',
+        price: 3800,
+        badge: 'BEST',
+        temps: ['ICE', 'HOT'],
+        isDrink: true,
+        desc: '상큼달콤한 자몽 과육과 향긋한 블랙티, 아카시아 꿀이 조화된 베스트 티 음료',
+        img: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=600&q=80',
+        nutrition: { kcal: '165kcal', caffeine: '32mg', sugar: '38g', protein: '0g', fat: '0g' }
+      },
+      {
+        id: 11,
+        name: '청포도 에이드',
+        category: '에이드/티',
+        price: 3500,
+        badge: '',
+        temps: ['ICE'],
+        isDrink: true,
+        desc: '톡 쏘는 탄산수와 탱글탱글한 청포도 과육이 입안 가득 상쾌함을 전하는 에이드',
+        img: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=600&q=80',
+        nutrition: { kcal: '190kcal', caffeine: '0mg', sugar: '44g', protein: '0g', fat: '0g' }
+      },
+      {
+        id: 12,
+        name: '유자 민트 티',
+        category: '에이드/티',
+        price: 3600,
+        badge: 'NEW',
+        temps: ['ICE', 'HOT'],
+        isDrink: true,
+        desc: '향긋한 고흥 유자청에 상쾌한 페퍼민트 잎을 더해 깔끔하게 즐기는 힐링 티',
+        img: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=600&q=80',
+        nutrition: { kcal: '155kcal', caffeine: '0mg', sugar: '36g', protein: '0g', fat: '0g' }
+      },
+      {
+        id: 13,
+        name: '민트초코 오레오 프라페',
+        category: '프라페/스무디',
+        price: 4200,
+        badge: 'BEST',
+        temps: ['ICE'],
+        isDrink: true,
+        desc: '상쾌한 민트와 바삭한 오레오 쿠키, 진한 초코칩이 블렌딩된 시원한 프라페',
+        img: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=600&q=80',
+        nutrition: { kcal: '490kcal', caffeine: '15mg', sugar: '58g', protein: '8g', fat: '16g' }
+      },
+      {
+        id: 14,
+        name: '딸기 요거트 스무디',
+        category: '프라페/스무디',
+        price: 4000,
+        badge: '',
+        temps: ['ICE'],
+        isDrink: true,
+        desc: '새콤달콤한 딸기 과육과 진한 플레인 요거트가 어우러진 부드러운 스무디',
+        img: 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=600&q=80',
+        nutrition: { kcal: '360kcal', caffeine: '0mg', sugar: '52g', protein: '6g', fat: '4g' }
+      },
+      {
+        id: 15,
+        name: '쿠키앤크림 프라페',
+        category: '프라페/스무디',
+        price: 3900,
+        badge: '',
+        temps: ['ICE'],
+        isDrink: true,
+        desc: '바닐라 밀크 쉐이크에 블랙 쿠키 크럼블을 듬뿍 갈아 넣은 남녀노소 인기 메뉴',
+        img: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&q=80',
+        nutrition: { kcal: '470kcal', caffeine: '8mg', sugar: '54g', protein: '8g', fat: '15g' }
+      },
+      {
+        id: 16,
+        name: '브라운치즈 크로플',
+        category: '디저트',
+        price: 3500,
+        badge: 'BEST',
+        temps: [],
+        isDrink: false,
+        desc: '갓 구운 바삭한 버터 크로플 위에 단짠단짠 노르웨이 브라운치즈를 듬뿍 올린 디저트',
+        img: 'https://images.unsplash.com/photo-1562376552-0d160a2f238d?auto=format&fit=crop&w=600&q=80',
+        nutrition: { kcal: '390kcal', caffeine: '0mg', sugar: '22g', protein: '7g', fat: '21g' }
+      },
+      {
+        id: 17,
+        name: '버터 소금빵',
+        category: '디저트',
+        price: 2500,
+        badge: 'NEW',
+        temps: [],
+        isDrink: false,
+        desc: '고소한 프랑스산 고메 버터의 풍미와 펄 솔트의 짭조름함이 매력적인 겉바속촉 소금빵',
+        img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80',
+        nutrition: { kcal: '285kcal', caffeine: '0mg', sugar: '5g', protein: '6g', fat: '15g' }
+      },
+      {
+        id: 18,
+        name: '우유 생크림 카스테라',
+        category: '디저트',
+        price: 3800,
+        badge: '',
+        temps: [],
+        isDrink: false,
+        desc: '촉촉한 카스테라 빵 속에 부드러운 100% 동물성 우유 생크림이 가득 들어있는 디저트',
+        img: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80',
+        nutrition: { kcal: '420kcal', caffeine: '0mg', sugar: '34g', protein: '7g', fat: '20g' }
+      }
+    ];
+
+    const CATEGORIES = ['전체', '베스트', '시즌 메뉴', '커피', '논커피/라떼', '에이드/티', '프라페/스무디', '디저트'];
+
+    const TOPPING_OPTIONS = [
+      { id: 'shot', name: '에스프레소 샷 추가', price: 500 },
+      { id: 'vanilla', name: '바닐라 시럽 추가', price: 500 },
+      { id: 'pearl', name: '타피오카 펄 추가', price: 700 },
+      { id: 'whip', name: '휘핑크림 추가', price: 500 },
+      { id: 'less_ice', name: '얼음 적게', price: 0 }
+    ];
+
+    // 상태 관리
+    let selectedCategory = '전체';
+    let searchQuery = '';
+    let orderType = '테이크아웃 (포장)';
+    let cart = [];
+
+    // 모달 임시 상태
+    let currentModalItem = null;
+    let modalTemp = 'ICE';
+    let modalSize = '기본 (20oz)';
+    let modalSizePrice = 0;
+    let modalToppings = [];
+    let modalQty = 1;
+
+    // 초기화
+    function init() {
+      renderCategories();
+      renderMenu();
+    }
+
+    // 카테고리 탭 렌더링
+    function renderCategories() {
+      const container = document.getElementById('category-tabs');
+      container.innerHTML = CATEGORIES.map(cat => {
+        const isActive = selectedCategory === cat;
+        return `
+          <button
+            onclick="selectCategory('${cat}')"
+            class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black whitespace-nowrap transition-all ${
+              isActive
+                ? 'bg-ohooBlack text-ohooYellow shadow-sm'
+                : 'bg-ohooGray text-neutral-600 hover:bg-neutral-200 hover:text-ohooBlack'
+            }"
+          >
+            ${cat === '베스트' ? '★ ' + cat : cat}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectCategory(cat) {
+      selectedCategory = cat;
+      renderCategories();
+      renderMenu();
+    }
+
+    function filterBestOnly() {
+      selectedCategory = '베스트';
+      renderCategories();
+      renderMenu();
+    }
+
+    function resetFilters() {
+      selectedCategory = '전체';
+      searchQuery = '';
+      document.getElementById('search-input').value = '';
+      renderCategories();
+      renderMenu();
+    }
+
+    function handleSearch(val) {
+      searchQuery = val.trim().toLowerCase();
+      renderMenu();
+    }
+
+    function setOrderType(type) {
+      orderType = type;
+      const takeoutBtn = document.getElementById('order-type-takeout');
+      const dineinBtn = document.getElementById('order-type-dinein');
+      if (type === '테이크아웃 (포장)') {
+        takeoutBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-black bg-ohooBlack text-ohooYellow transition-all';
+        dineinBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold text-neutral-600 hover:text-ohooBlack transition-all';
+      } else {
+        dineinBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-black bg-ohooBlack text-ohooYellow transition-all';
+        takeoutBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold text-neutral-600 hover:text-ohooBlack transition-all';
+      }
+      document.getElementById('cart-order-type-label').textContent = type;
+    }
+
+    // 메뉴 그리드 렌더링
+    function renderMenu() {
+      const grid = document.getElementById('menu-grid');
+      const emptyState = document.getElementById('empty-state');
+
+      const filtered = MENU_ITEMS.filter(item => {
+        const matchesCat =
+          selectedCategory === '전체'
+            ? true
+            : selectedCategory === '베스트'
+            ? item.badge === 'BEST'
+            : item.category === selectedCategory;
+
+        const matchesQuery =
+          !searchQuery ||
+          item.name.toLowerCase().includes(searchQuery) ||
+          item.category.toLowerCase().includes(searchQuery) ||
+          item.desc.toLowerCase().includes(searchQuery);
+
+        return matchesCat && matchesQuery;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      grid.innerHTML = filtered.map(item => {
+        const badgeHtml = item.badge
+          ? `<span class="absolute top-3 left-3 z-10 text-[10px] font-black px-2.5 py-1 rounded-lg border border-ohooBlack ${
+              item.badge === 'BEST' ? 'bg-ohooYellow text-ohooBlack' : 'bg-ohooBlack text-ohooYellow'
+            }">${item.badge}</span>`
+          : '';
+
+        const tempBadges = item.temps.map(t =>
+          `<span class="text-[10px] font-black px-1.5 py-0.5 rounded ${
+            t === 'ICE' ? 'bg-sky-50 text-sky-600 border border-sky-200' : 'bg-rose-50 text-rose-600 border border-rose-200'
+          }">${t}</span>`
+        ).join('');
+
+        return `
+          <div
+            onclick="openItemModal(${item.id})"
+            class="group cursor-pointer bg-white rounded-2xl border border-ohooBorder hover:border-ohooBlack hover:shadow-[4px_4px_0px_#1A1A1A] transition-all overflow-hidden flex flex-col justify-between"
+          >
+            <div>
+              <div class="relative aspect-square bg-ohooGray overflow-hidden">
+                ${badgeHtml}
+                <img
+                  src="${item.img}"
+                  alt="${item.name}"
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
+                <button
+                  type="button"
+                  class="absolute bottom-3 right-3 w-9 h-9 rounded-full bg-ohooYellow border-2 border-ohooBlack text-ohooBlack font-black flex items-center justify-center shadow-md opacity-95 group-hover:scale-110 transition-transform"
+                  aria-label="옵션 선택"
+                >
+                  +
+                </button>
+              </div>
+              <div class="p-4 pb-2">
+                <div class="flex items-center justify-between gap-1 mb-1">
+                  <span class="text-[11px] font-bold text-neutral-400">${item.category}</span>
+                  <div class="flex items-center gap-1">${tempBadges}</div>
+                </div>
+                <h3 class="font-black text-base sm:text-[17px] text-ohooBlack group-hover:text-amber-600 transition-colors line-clamp-1">
+                  ${item.name}
+                </h3>
+                <p class="text-xs text-neutral-500 mt-1 line-clamp-2 leading-relaxed">
+                  ${item.desc}
+                </p>
+              </div>
+            </div>
+            <div class="px-4 pb-4 pt-2 flex items-baseline justify-between border-t border-neutral-100 mt-2">
+              <span class="text-[11px] font-bold text-neutral-400">${item.isDrink ? '20oz 기준' : '1개'}</span>
+              <div>
+                <span class="text-lg font-black text-ohooBlack">${item.price.toLocaleString()}</span>
+                <span class="text-xs font-bold text-ohooBlack">원</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 상세 옵션 모달 열기
+    function openItemModal(id) {
+      const item = MENU_ITEMS.find(m => m.id === id);
+      if (!item) return;
+
+      currentModalItem = item;
+      modalTemp = item.temps.includes('ICE') ? 'ICE' : (item.temps[0] || '기본');
+      modalSize = '기본 (20oz)';
+      modalSizePrice = 0;
+      modalToppings = [];
+      modalQty = 1;
+
+      document.getElementById('modal-img').src = item.img;
+      document.getElementById('modal-name').textContent = item.name;
+      document.getElementById('modal-desc').textContent = item.desc;
+      document.getElementById('modal-base-price').textContent = item.price.toLocaleString();
+      document.getElementById('modal-qty').textContent = modalQty;
+
+      // 배지
